@@ -46,3 +46,5 @@ RUN gem install bundler --version "$BUNDLER_VERSION" \
 
 # don't create ".bundle" in all our apps
 ENV BUNDLE_APP_CONFIG $GEM_HOME
+
+RUN gem install github-pages
