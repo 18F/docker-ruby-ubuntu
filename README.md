@@ -1,4 +1,4 @@
-A copy of https://github.com/docker-library/ruby/blob/master/2.2/Dockerfile that uses Ubuntu Trusty as the base image and sets the locale to `en_US.UTF-8`.
+A copy of https://github.com/docker-library/ruby/blob/master/2.2/Dockerfile that uses Ubuntu Trusty as the base image, includes a recent version of node.js, and sets the locale to `en_US.UTF-8`.
 
 ### Public domain
 
