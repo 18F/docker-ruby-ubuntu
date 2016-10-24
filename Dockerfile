@@ -1,9 +1,4 @@
-FROM buildpack-deps:trusty
-
-ENV RUBY_MAJOR 2.3
-ENV RUBY_VERSION 2.3.1
-ENV RUBY_DOWNLOAD_SHA256 b87c738cb2032bf4920fef8e3864dc5cf8eae9d89d8d523ce0236945c5797dcd
-ENV RUBYGEMS_VERSION 2.6.7
+FROM ubuntu:trusty
 
 RUN locale-gen en_US en_US.UTF-8 \
   && dpkg-reconfigure locales
@@ -12,31 +7,24 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# Install general dependencies
+RUN apt-get update && apt-get install -y build-essential git curl libssl-dev libreadline-dev zlib1g-dev
+
 # get the latest version of node
 # https://nodejs.org/en/download/package-manager/
-RUN curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash - \
+	&& apt-get install -y nodejs
 
 # skip installing gem documentation
 RUN echo 'install: --no-document\nupdate: --no-document' >> "$HOME/.gemrc"
 
-# some of ruby's build scripts are written in ruby
-# we purge this later to make sure our final image uses what we just built
-RUN apt-get update \
-	&& apt-get install -y bison libgdbm-dev nodejs build-essential ruby \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& mkdir -p /usr/src/ruby \
-	&& curl -fSL -o ruby.tar.gz "https://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR/ruby-$RUBY_VERSION.tar.gz" \
-	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.gz" | sha256sum -c - \
-	&& tar -xzf ruby.tar.gz -C /usr/src/ruby --strip-components=1 \
-	&& rm ruby.tar.gz \
-	&& cd /usr/src/ruby \
-	&& autoconf \
-	&& ./configure --disable-install-doc \
-	&& make -j"$(nproc)" \
-	&& make install \
-	&& apt-get purge -y --auto-remove bison libgdbm-dev ruby \
-	&& gem update --system $RUBYGEMS_VERSION \
-	&& rm -r /usr/src/ruby
+# Install ruby via ruby-build
+ENV RUBY_VERSION 2.3.1
+RUN git clone https://github.com/rbenv/ruby-build.git $HOME/ruby-build \
+  && cd $HOME/ruby-build \
+  && ./install.sh \
+  && ruby-build --verbose $RUBY_VERSION /usr/ \
+  && cd / && rm -rf $HOME/ruby-build
 
 # install things globally, for great justice
 ENV GEM_HOME /usr/local/bundle
