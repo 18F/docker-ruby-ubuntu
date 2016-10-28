@@ -18,7 +18,9 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.31.3/install.sh | b
   && nvm install $NODE_DEFAULT_VERSION \
   && nvm install 6 \
   && nvm use $NODE_DEFAULT_VERSION \
-  && echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> $HOME/.profile
+  && echo 'export OLD_PREFIX=$PREFIX && unset PREFIX' > $HOME/.profile \
+  && echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> $HOME/.profile \
+  && echo 'export PREFIX=$OLD_PREFIX && unset OLD_PREFIX' >> $HOME/.profile
 
 # skip installing gem documentation
 RUN echo 'install: --no-document\nupdate: --no-document' >> "$HOME/.gemrc"
