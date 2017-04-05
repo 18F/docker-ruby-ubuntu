@@ -8,7 +8,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install general dependencies
-RUN apt-get update && apt-get install -y build-essential git curl libssl-dev libreadline-dev zlib1g-dev
+RUN apt-get update && apt-get install -y build-essential git curl libssl-dev libreadline-dev zlib1g-dev python3-dev
 
 # install nvm and install versions 4 and 6
 ENV NVM_DIR /usr/local/nvm
@@ -22,26 +22,11 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.31.3/install.sh | b
   && echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> $HOME/.profile \
   && echo 'export PREFIX=$OLD_PREFIX && unset OLD_PREFIX' >> $HOME/.profile
 
-# skip installing gem documentation
-RUN echo 'install: --no-document\nupdate: --no-document' >> "$HOME/.gemrc"
-
-# Install ruby via ruby-build
+# Install ruby via rvm
 ENV RUBY_VERSION 2.3.1
-RUN git clone https://github.com/rbenv/ruby-build.git $HOME/ruby-build \
-  && cd $HOME/ruby-build \
-  && ./install.sh \
-  && ruby-build --verbose $RUBY_VERSION /usr/ \
-  && cd / && rm -rf $HOME/ruby-build
-
-# install things globally, for great justice
-ENV GEM_HOME /usr/local/bundle
-ENV PATH $GEM_HOME/bin:$PATH
-
-ENV BUNDLER_VERSION 1.13.5
-
-RUN gem install bundler --version "$BUNDLER_VERSION" \
-  && bundle config --global path "$GEM_HOME" \
-  && bundle config --global bin "$GEM_HOME/bin"
+RUN \curl -sSL https://get.rvm.io | bash -s stable
+RUN /bin/bash -l -c 'rvm install $RUBY_VERSION && rvm use --default $RUBY_VERSION'
+RUN echo rvm_silence_path_mismatch_check_flag=1 >> /etc/rvmrc
 
 # don't create ".bundle" in all our apps
 ENV BUNDLE_APP_CONFIG $GEM_HOME
