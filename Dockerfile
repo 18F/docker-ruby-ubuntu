@@ -27,6 +27,3 @@ ENV RUBY_VERSION 2.3.1
 RUN \curl -sSL https://get.rvm.io | bash -s stable
 RUN /bin/bash -l -c 'rvm install $RUBY_VERSION && rvm use --default $RUBY_VERSION'
 RUN echo rvm_silence_path_mismatch_check_flag=1 >> /etc/rvmrc
-
-# don't create ".bundle" in all our apps
-ENV BUNDLE_APP_CONFIG $GEM_HOME
